@@ -193,6 +193,8 @@ html[lang="id"] .character-drawer summary{font-size:14px}
 .sticky-header{position:sticky;top:0;z-index:30;background:#f5e6ad;padding-top:4px;padding-bottom:9px}.sticky-header .topline{margin-bottom:7px}.resource-bar{display:flex;justify-content:space-between;gap:12px;padding:8px 14px;border:1px solid #cfc39f;border-radius:13px;background:#fff8e8;font-size:14px;font-weight:700;box-shadow:0 2px 0 #cfbd8d}.resource-bar>span{display:flex;align-items:center;gap:7px}.resource-bar strong{min-width:24px;text-align:right;color:#8c465c;font-size:17px}.wake-button{width:100%;padding:13px;margin-top:12px;border-radius:14px;border:2px solid #8c9d72;background:#e3edcf;color:#30201f;font-weight:800}.wake-button:disabled{opacity:.5}
 .pull-counter{margin-top:12px;padding:12px 14px;background:#edf0dc;border:1px solid #c7cfaa;border-radius:16px}.pull-counter-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px}.pull-counter-heading strong{font-size:20px;white-space:nowrap}.pull-counter progress{display:block;width:100%;height:9px;margin-top:9px;border:0;border-radius:8px;overflow:hidden;background:#d9dec8;accent-color:#a05a70}.pull-counter progress::-webkit-progress-bar{background:#d9dec8;border-radius:8px}.pull-counter progress::-webkit-progress-value{background:#a05a70;border-radius:8px}.pull-counter progress::-moz-progress-bar{background:#a05a70;border-radius:8px}.pull-counter .coin-note{margin:8px 0 0;font-size:13px;line-height:1.4}
 .key-reveal{position:relative;isolation:isolate;width:156px;height:118px;margin:2px auto 8px;background:radial-gradient(ellipse,#ffdd78aa,transparent 70%);animation:revealPop .45s ease-out}.key-reveal svg{display:block;width:100%;height:100%;filter:drop-shadow(0 5px 0 #ad7b3030);animation:keyHover 2.4s ease-in-out infinite}.key-reveal-badge{position:absolute;right:4px;bottom:12px;background:#e2f0cf;border:2px solid #6f7d42;border-radius:18px;padding:1px 9px;font-weight:900;font-size:18px;color:#40512d;box-shadow:0 3px 0 #c4c9a7}.key-star{position:absolute;font-style:normal;color:#c68b23;animation:keyTwinkle 1.2s ease-in-out infinite}.key-star.a{left:5px;top:12px;font-size:22px}.key-star.b{right:0;top:17px;font-size:28px;animation-delay:.2s}.key-star.c{left:20px;bottom:7px;font-size:18px;animation-delay:.4s}.key-earned{display:inline-block;animation:keyBalanceGlow .55s ease-in-out 3}@keyframes keyHover{50%{transform:translateY(-5px) rotate(3deg)}}@keyframes keyTwinkle{50%{opacity:.4;transform:scale(.7)}}@keyframes keyBalanceGlow{50%{color:#966300;transform:scale(1.3);text-shadow:0 0 10px #f3c556}}@media(prefers-reduced-motion:reduce){.key-reveal,.key-reveal svg,.key-star,.key-earned{animation:none!important}}
+
+.missed-home{margin-top:16px;padding:14px;border:1px solid #d9c89b;border-radius:14px;background:#f8edcf}.missed-home h2{font-size:17px;margin:0;display:flex;justify-content:space-between;gap:12px}.missed-home p{font-size:14px;line-height:1.45;margin:8px 0;color:#62443e}.missed-actions{display:flex;gap:8px;flex-wrap:wrap}.missed-actions button{flex:1;min-height:44px;padding:9px;font-size:14px;margin:0}.review-word .study-launch{min-height:44px;padding:10px 14px;margin-top:8px}.missed-count{display:block;font-size:13px;margin-top:3px;font-variant-numeric:tabular-nums;color:#9b4c61}#missedReviewBtn{display:flex;flex-direction:column;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
@@ -232,6 +234,7 @@ html[lang="id"] .character-drawer summary{font-size:14px}
         <button class="surprise-launch" id="surpriseBtn"><span id="surpriseLaunchLabel">🎁 Mochi Surprise</span><strong id="walletHome">0 coins</strong></button>
         <button class="study-launch" id="studyBtn"><strong data-copy="studyNav">Study Hall</strong></button>
         <button class="secondary" id="reviewBtn"><span data-copy="lastRunNav">Last Run</span></button>
+        <button class="study-launch" id="missedReviewBtn"><span data-copy="missedWords">Missed words</span><span id="missedHomeCount" class="missed-count">0</span></button>
       </div>
       <p class="learning-note reward-note" data-copy="rewardHint"></p>
       <p class="hint"><span data-copy="hint">Two choices. One chance. How far can you go?</span></p>
@@ -322,6 +325,12 @@ html[lang="id"] .character-drawer summary{font-size:14px}
       <details class="surprise-rules"><summary id="rulesTitle"></summary><ul id="rulesList"></ul></details>
       <details class="collection-drawer"><summary id="collectionTitle"></summary><div class="collection-grid" id="fullCollection"></div></details>
       <p class="coin-note" id="saveNote"></p>
+    </section>
+    <section class="screen hidden" id="missedScreen" aria-labelledby="missedTitle">
+      <div class="learning-header"><h2 id="missedTitle" data-copy="missedWords">Missed words</h2><button class="secondary" id="missedBack" data-copy="back">Menu</button></div>
+      <p class="learning-note" data-copy="missedIntro"></p>
+      <button class="study-launch" id="practiceAllMissed" data-copy="practiceMissed"></button>
+      <div id="missedWordList"></div>
     </section>
     <section class="screen hidden" id="reviewScreen" aria-labelledby="reviewTitle">
       <div class="learning-header"><h2 id="reviewTitle" data-copy="lastRun">Last Run</h2><button class="secondary" id="reviewBack" data-copy="back">← Menu</button></div>
@@ -416,7 +425,7 @@ html[lang="id"] .character-drawer summary{font-size:14px}
     ["to negotiate","to compromise"], ["to contribute","to obstruct"],
     ["to recognize","to overcome"], ["possibility","perspective"]
   ];
-  const copy = {"practice": ["Choose what to practice", "練習する言語"], "learnJp": ["Learn Japanese", "日本語を練習"], "learnEn": ["Learn English", "英語を練習"], "mode": ["Choose your mode", "ゲームモード"], "endless": ["Quest", "クエスト"], "endlessHint": ["One mistake ends it", "1問間違えたら終了"], "timed": ["60 seconds", "60秒"], "timedHint": ["Go for your best score", "自己ベストに挑戦"], "play": ["PLAY NOW", "スタート"], "hint": ["Two choices. One chance. How far can you go?", "2択クイズ。何問連続で正解できる？"], "score": ["Score", "スコア"], "exit": ["← Exit", "← やめる"], "again": ["PLAY AGAIN ↻", "もう一度 ↻"], "menu": ["Back to menu", "メニューに戻る"], "interface": ["Interface language", "表示言語"], "sound": ["Sound", "サウンド"], "on": ["ON", "オン"], "off": ["OFF", "オフ"], "best": ["Best", "ベスト"], "chooseJp": ["Choose the Japanese", "日本語の意味を選ぼう"], "chooseEn": ["Choose the English", "英語の意味を選ぼう"], "meaning": ["What does this mean?", "この単語の意味は？"], "level": ["LEVEL", "レベル"], "levels": [["STARTER", "EVERYDAY", "INTERMEDIATE", "CHALLENGE"], ["入門", "日常", "中級", "上級"]], "correct": ["Correct! ✨", "正解！ ✨"], "wrong": ["One mistake ends the run", "不正解。ゲーム終了！"], "streak": ["{n} in a row!", "{n}問連続正解！"], "time": ["Time’s up!", "時間切れ！"], "over": ["Game over!", "ゲーム終了！"], "timedDone": ["60-second round complete", "60秒チャレンジ終了"], "wrongDone": ["Here’s the correct answer", "正解はこちら"], "record": ["New personal best!", "自己ベスト更新！"], "personalBest": ["Personal best", "自己ベスト"], "characters": ["Choose your character", "キャラクターを選ぼう"], "journey": ["Level", "レベル"], "complete": ["Level {n} complete!", "レベル {n} クリア！"], "dog": ["Dog · いぬ", "犬 · いぬ"], "cat": ["Cat · ねこ", "猫 · ねこ"], "bunny": ["Bunny · うさぎ", "うさぎ"], "koala": ["Koala · コアラ", "コアラ"], "monkey": ["Monkey · さる", "猿 · さる"], "study": ["Study Hall", "スタディホール"], "studyHint": ["Learn every word at your own pace", "すべての単語を自分のペースで学ぼう"], "lastRun": ["Last Run", "前回のプレイ"], "back": ["← Menu", "← メニュー"], "allWords": ["All words", "すべての単語"], "starter": ["Starter", "入門"], "everyday": ["Everyday", "日常"], "intermediate": ["Intermediate", "中級"], "challenge": ["Challenge", "上級"], "listen": ["▶ Listen", "▶ 発音を聞く"], "checkMemory": ["Check my memory", "覚えたかチェック"], "next": ["Next →", "次へ →"], "previous": ["← Previous", "← 前へ"], "practiced": ["{n} / {total} words practiced", "{total}語中 {n}語を練習済み"], "studyPosition": ["Word {n} of {total}", "{total}語中 {n}語目"], "retryStudy": ["Try again", "もう一度チェック"], "studyCorrect": ["You got it! Ready for the next word?", "正解！次の単語に進もう"], "studyWrong": ["Let’s look again. Read it, then try once more.", "もう一度見てみよう。読んでから再挑戦！"], "studyThis": ["Study this word", "この単語を学ぶ"], "missedWord": ["The word you missed", "間違えた単語"], "correctWord": ["Correct", "正解"], "wrongWord": ["Missed", "不正解"], "yourAnswer": ["Your answer", "あなたの答え"], "meaningLabel": ["Meaning", "意味"], "noRun": ["Your latest run will appear here.", "プレイすると、ここに記録が表示されます"], "reviewIntro": ["Your most recent run, saved on this device.", "この端末に保存された前回のプレイです"], "runExit": ["Left early", "途中で終了"], "runTime": ["Time ran out", "時間切れ"], "runWrong": ["One wrong answer", "不正解で終了"], "runCount": ["{n} answers reviewed", "{n}問の回答"], "noAnswers": ["No answers in this run yet.", "このプレイではまだ回答していません"], "noVoice": ["Japanese audio is unavailable on this device.", "この端末では日本語の音声を利用できません"], "studyTip": ["Read the word and its reading, listen, then test yourself.", "単語と読み方を確認して、発音を聞いてからチェックしよう。"], "topics": ["Topic", "テーマ"], "numbers": ["Numbers", "数字"], "colors": ["Colors", "色"], "greetings": ["Greetings", "あいさつ"], "phrases": ["Everyday phrases", "日常フレーズ"], "vocabulary": ["Everyday words", "日常の単語"], "listenMuted": ["Turn sound on to listen.", "発音を聞くにはサウンドをオンにしてください"], "studyNav": ["Study Hall", "学習室"], "lastRunNav": ["Last Run", "前回の記録"], "saveError": ["Can’t save progress. Check your browser storage settings.", "保存できません。ブラウザの保存設定を確認してください。"], "coinsPlus": ["Coins +", "コイン +"], "unlocked": ["Unlocked", "仲間入り"], "locked": ["🔒 Locked", "🔒 未解放"], "surpriseNav": ["🗝 Dream Keys", "🗝 夢の鍵"], "surpriseTitle": ["Dream Keys", "夢の鍵"], "coinsUnit": [" coins", " コイン"], "surpriseIntro": ["Spin the enchanted box. A rare Dream Key wakes a lost Mojimo and brings them home.", "魔法の箱を回そう。レアな夢の鍵が見つかると、仲間が目覚めて帰ってくるよ。"], "walletLabel": ["Your coins", "持っているコイン"], "collectionLabel": ["Your Mojimo", "集めた仲間"], "spinning": ["Spinning…", "くるくる…"], "collectionDone": ["Collection complete!", "全員そろった！"], "needCoins": ["Earn {n} more coins", "あと{n}コイン必要"], "openCoins": ["Open · {n} coins", "{n}コインで開ける"], "costNote": ["This opening: {n} · next opening: {next} coins", "今回 {n}コイン · 次回 {next}コイン"], "allHome": ["All 19 friends are home.", "19匹の仲間が全員集まりました。"], "rulesTitle": ["How it works", "あそび方"], "collectionTitle": ["Collection · {n}/{total}", "仲間たち · {n}/{total}"], "saveNote": ["Coins and friends are saved in this browser. They don’t sync to other devices.", "コインと仲間はこのブラウザに保存されます。別の端末には引き継がれません。"], "whoInside": ["Who might be waiting inside?", "どんな出会いが待っているかな？"], "meetFriend": ["You woke {name}!", "{name}が目覚めた！"], "chooseFriend": ["Choose this Mojimo", "この仲間を選ぶ"], "sparkle": ["A little sparkle! ✨", "キラキラ！ ✨"], "noFriend": ["No key this time. The dream dust sparkles!", "今回は鍵なし。夢の粉がキラキラ！"], "stirring": ["Something is stirring inside…", "箱の中で何かが…"], "resting": [" resting", " おやすみ"], "hopping": [" hopping", " ジャンプ"], "journeyProgress": ["Level {n}, {steps} of 10 steps", "レベル {n}、10問中{steps}問"], "openCoin": ["Open · {n} coin", "{n}コインで開ける"], "needCoin": ["Earn {n} more coin", "あと{n}コイン必要"], "kanaNav": ["Kana Garden", "かなガーデン"], "lessonsNav": ["Lesson Trail", "ことばの道"], "storyTitle": ["Bring our friends home", "仲間をおうちへ"], "storyText": ["A sleepy spell scattered the Mojimo across ten dreamlands. Learn Japanese, earn coins, and spin for a Dream Key to wake a lost friend.", "眠りの魔法で仲間が10の夢の世界に。日本語を学び、コインを集めて、夢の鍵で仲間を起こそう。"], "secret": ["Secret friend · wake all 18 others", "秘密の仲間 · ほかの18匹を集めよう"], "secretReady": ["Goromaru is awake! Your whole family is home.", "ゴロマルが目覚めた！全員おかえり！"], "kanaTip": ["Learn the shapes and sounds. Practice freely — no coins in Kana Garden.", "文字と音を学ぼう。かなガーデンではコインは増えません。"], "script": ["Writing system", "文字の種類"], "kanaGroup": ["Character group", "文字グループ"], "baseKana": ["Basic · 46 characters", "基本 · 46文字"], "voicedKana": ["Dakuten & handakuten", "濁音・半濁音"], "comboKana": ["Contracted sounds · yōon", "拗音 · 小さいゃゅょ"], "smallKana": ["Small kana & long vowels", "小さい文字・長音"], "extraKana": ["Historical / foreign sounds", "歴史的仮名・外来音"], "kanaLearn": ["Learn", "学ぶ"], "kanaQuiz": ["Practice reading", "読みクイズ"], "kanaAsk": ["How do you read this?", "読み方は？"], "kanaProgress": ["{n}/{total} practiced · no coins", "{total}文字中{n}文字を練習 · コインなし"], "kanaCorrect": ["Yes! {reading}", "正解！ {reading}"], "kanaWrong": ["Read it as {reading}. Try the next one.", "読み方は {reading}。次も挑戦！"], "lessonIntro": ["Guided lessons use every word in Quest and 60 seconds. Read, listen, and check your memory before a run.", "クエストと60秒に出るすべての単語を学ぼう。読んで、聞いて、チェック！"], "lessonStart": ["Start lesson", "レッスン開始"], "lessonPart": ["Lesson {n} · {count} words", "レッスン{n} · {count}語"], "rewardHint": ["Quest: 20 coins per perfect 10. 60 seconds: +2 per correct, −1 per mistake, 0–100 at the finish. Learning modes give no coins. Leaving early earns no timed coins.", "クエスト：10問連続正解で20コイン。60秒：正解＋2、ミス−1。終了時に0〜100。学習モードと途中終了の時間モードは報酬なし。"], "runReward": ["This run: {n} coins", "今回：{n}コイン"], "timedMistake": ["−1 coin · keep going!", "−1コイン · 続けよう！"], "studyAll": ["Browse all words", "単語一覧"], "lessonDone": ["Lesson complete!", "レッスンクリア！"], "keys": ["Keys", "鍵"], "coins": ["Coins", "コイン"], "wakeFriend": ["Wake a friend · 1 key", "仲間を起こす · 鍵1個"], "foundKey": ["You found a Dream Key!", "夢の鍵を見つけた！"], "useKeyTip": ["Your key is saved. Spend it below to wake a lost friend.", "鍵を保存しました。下のボタンで仲間を起こそう。"], "keysReady": ["Use your saved keys", "持っている鍵を使おう"], "pityStatus": ["Next pull: {chance}% key chance · guaranteed within {n} pulls.", "次の鍵の確率：{chance}% · あと{n}回以内に必ず獲得。"], "totalPulls": ["Total pulls", "合計回数"], "totalPullsHint": ["All required keys are guaranteed by pull 600.", "合計600回以内に必要な鍵がすべてそろいます。"], "totalPullsDone": ["All required keys collected!", "必要な鍵がすべてそろいました！"], "learningNoCoins": ["Practice freely · no coin rewards", "自由に練習 · コイン報酬なし"]};
+  const copy = {"practice": ["Choose what to practice", "練習する言語"], "learnJp": ["Learn Japanese", "日本語を練習"], "learnEn": ["Learn English", "英語を練習"], "mode": ["Choose your mode", "ゲームモード"], "endless": ["Quest", "クエスト"], "endlessHint": ["One mistake ends it", "1問間違えたら終了"], "timed": ["60 seconds", "60秒"], "timedHint": ["Go for your best score", "自己ベストに挑戦"], "play": ["PLAY NOW", "スタート"], "hint": ["Two choices. One chance. How far can you go?", "2択クイズ。何問連続で正解できる？"], "score": ["Score", "スコア"], "exit": ["← Exit", "← やめる"], "again": ["PLAY AGAIN ↻", "もう一度 ↻"], "menu": ["Back to menu", "メニューに戻る"], "interface": ["Interface language", "表示言語"], "sound": ["Sound", "サウンド"], "on": ["ON", "オン"], "off": ["OFF", "オフ"], "best": ["Best", "ベスト"], "chooseJp": ["Choose the Japanese", "日本語の意味を選ぼう"], "chooseEn": ["Choose the English", "英語の意味を選ぼう"], "meaning": ["What does this mean?", "この単語の意味は？"], "level": ["LEVEL", "レベル"], "levels": [["STARTER", "EVERYDAY", "INTERMEDIATE", "CHALLENGE"], ["入門", "日常", "中級", "上級"]], "correct": ["Correct! ✨", "正解！ ✨"], "wrong": ["One mistake ends the run", "不正解。ゲーム終了！"], "streak": ["{n} in a row!", "{n}問連続正解！"], "time": ["Time’s up!", "時間切れ！"], "over": ["Game over!", "ゲーム終了！"], "timedDone": ["60-second round complete", "60秒チャレンジ終了"], "wrongDone": ["Here’s the correct answer", "正解はこちら"], "record": ["New personal best!", "自己ベスト更新！"], "personalBest": ["Personal best", "自己ベスト"], "characters": ["Choose your character", "キャラクターを選ぼう"], "journey": ["Level", "レベル"], "complete": ["Level {n} complete!", "レベル {n} クリア！"], "dog": ["Dog · いぬ", "犬 · いぬ"], "cat": ["Cat · ねこ", "猫 · ねこ"], "bunny": ["Bunny · うさぎ", "うさぎ"], "koala": ["Koala · コアラ", "コアラ"], "monkey": ["Monkey · さる", "猿 · さる"], "study": ["Study Hall", "スタディホール"], "studyHint": ["Learn every word at your own pace", "すべての単語を自分のペースで学ぼう"], "lastRun": ["Last Run", "前回のプレイ"], "back": ["← Menu", "← メニュー"], "allWords": ["All words", "すべての単語"], "starter": ["Starter", "入門"], "everyday": ["Everyday", "日常"], "intermediate": ["Intermediate", "中級"], "challenge": ["Challenge", "上級"], "listen": ["▶ Listen", "▶ 発音を聞く"], "checkMemory": ["Check my memory", "覚えたかチェック"], "next": ["Next →", "次へ →"], "previous": ["← Previous", "← 前へ"], "practiced": ["{n} / {total} words practiced", "{total}語中 {n}語を練習済み"], "studyPosition": ["Word {n} of {total}", "{total}語中 {n}語目"], "retryStudy": ["Try again", "もう一度チェック"], "studyCorrect": ["You got it! Ready for the next word?", "正解！次の単語に進もう"], "studyWrong": ["Let’s look again. Read it, then try once more.", "もう一度見てみよう。読んでから再挑戦！"], "studyThis": ["Study this word", "この単語を学ぶ"], "missedWord": ["The word you missed", "間違えた単語"], "correctWord": ["Correct", "正解"], "wrongWord": ["Missed", "不正解"], "yourAnswer": ["Your answer", "あなたの答え"], "meaningLabel": ["Meaning", "意味"], "noRun": ["Your latest run will appear here.", "プレイすると、ここに記録が表示されます"], "reviewIntro": ["Your most recent run, saved on this device.", "この端末に保存された前回のプレイです"], "runExit": ["Left early", "途中で終了"], "runTime": ["Time ran out", "時間切れ"], "runWrong": ["One wrong answer", "不正解で終了"], "runCount": ["{n} answers reviewed", "{n}問の回答"], "noAnswers": ["No answers in this run yet.", "このプレイではまだ回答していません"], "noVoice": ["Japanese audio is unavailable on this device.", "この端末では日本語の音声を利用できません"], "studyTip": ["Read the word and its reading, listen, then test yourself.", "単語と読み方を確認して、発音を聞いてからチェックしよう。"], "topics": ["Topic", "テーマ"], "numbers": ["Numbers", "数字"], "colors": ["Colors", "色"], "greetings": ["Greetings", "あいさつ"], "phrases": ["Everyday phrases", "日常フレーズ"], "vocabulary": ["Everyday words", "日常の単語"], "listenMuted": ["Turn sound on to listen.", "発音を聞くにはサウンドをオンにしてください"], "studyNav": ["Study Hall", "学習室"], "lastRunNav": ["Last Run", "前回の記録"], "saveError": ["Can’t save progress. Check your browser storage settings.", "保存できません。ブラウザの保存設定を確認してください。"], "coinsPlus": ["Coins +", "コイン +"], "unlocked": ["Unlocked", "仲間入り"], "locked": ["🔒 Locked", "🔒 未解放"], "surpriseNav": ["🗝 Dream Keys", "🗝 夢の鍵"], "surpriseTitle": ["Dream Keys", "夢の鍵"], "coinsUnit": [" coins", " コイン"], "surpriseIntro": ["Spin the enchanted box. A rare Dream Key wakes a lost Mojimo and brings them home.", "魔法の箱を回そう。レアな夢の鍵が見つかると、仲間が目覚めて帰ってくるよ。"], "walletLabel": ["Your coins", "持っているコイン"], "collectionLabel": ["Your Mojimo", "集めた仲間"], "spinning": ["Spinning…", "くるくる…"], "collectionDone": ["Collection complete!", "全員そろった！"], "needCoins": ["Earn {n} more coins", "あと{n}コイン必要"], "openCoins": ["Open · {n} coins", "{n}コインで開ける"], "costNote": ["This opening: {n} · next opening: {next} coins", "今回 {n}コイン · 次回 {next}コイン"], "allHome": ["All 19 friends are home.", "19匹の仲間が全員集まりました。"], "rulesTitle": ["How it works", "あそび方"], "collectionTitle": ["Collection · {n}/{total}", "仲間たち · {n}/{total}"], "saveNote": ["Coins and friends are saved in this browser. They don’t sync to other devices.", "コインと仲間はこのブラウザに保存されます。別の端末には引き継がれません。"], "whoInside": ["Who might be waiting inside?", "どんな出会いが待っているかな？"], "meetFriend": ["You woke {name}!", "{name}が目覚めた！"], "chooseFriend": ["Choose this Mojimo", "この仲間を選ぶ"], "sparkle": ["A little sparkle! ✨", "キラキラ！ ✨"], "noFriend": ["No key this time. The dream dust sparkles!", "今回は鍵なし。夢の粉がキラキラ！"], "stirring": ["Something is stirring inside…", "箱の中で何かが…"], "resting": [" resting", " おやすみ"], "hopping": [" hopping", " ジャンプ"], "journeyProgress": ["Level {n}, {steps} of 10 steps", "レベル {n}、10問中{steps}問"], "openCoin": ["Open · {n} coin", "{n}コインで開ける"], "needCoin": ["Earn {n} more coin", "あと{n}コイン必要"], "kanaNav": ["Kana Garden", "かなガーデン"], "lessonsNav": ["Lesson Trail", "ことばの道"], "storyTitle": ["Bring our friends home", "仲間をおうちへ"], "storyText": ["A sleepy spell scattered the Mojimo across ten dreamlands. Learn Japanese, earn coins, and spin for a Dream Key to wake a lost friend.", "眠りの魔法で仲間が10の夢の世界に。日本語を学び、コインを集めて、夢の鍵で仲間を起こそう。"], "secret": ["Secret friend · wake all 18 others", "秘密の仲間 · ほかの18匹を集めよう"], "secretReady": ["Goromaru is awake! Your whole family is home.", "ゴロマルが目覚めた！全員おかえり！"], "kanaTip": ["Learn the shapes and sounds. Practice freely — no coins in Kana Garden.", "文字と音を学ぼう。かなガーデンではコインは増えません。"], "script": ["Writing system", "文字の種類"], "kanaGroup": ["Character group", "文字グループ"], "baseKana": ["Basic · 46 characters", "基本 · 46文字"], "voicedKana": ["Dakuten & handakuten", "濁音・半濁音"], "comboKana": ["Contracted sounds · yōon", "拗音 · 小さいゃゅょ"], "smallKana": ["Small kana & long vowels", "小さい文字・長音"], "extraKana": ["Historical / foreign sounds", "歴史的仮名・外来音"], "kanaLearn": ["Learn", "学ぶ"], "kanaQuiz": ["Practice reading", "読みクイズ"], "kanaAsk": ["How do you read this?", "読み方は？"], "kanaProgress": ["{n}/{total} practiced · no coins", "{total}文字中{n}文字を練習 · コインなし"], "kanaCorrect": ["Yes! {reading}", "正解！ {reading}"], "kanaWrong": ["Read it as {reading}. Try the next one.", "読み方は {reading}。次も挑戦！"], "lessonIntro": ["Guided lessons use every word in Quest and 60 seconds. Read, listen, and check your memory before a run.", "クエストと60秒に出るすべての単語を学ぼう。読んで、聞いて、チェック！"], "lessonStart": ["Start lesson", "レッスン開始"], "lessonPart": ["Lesson {n} · {count} words", "レッスン{n} · {count}語"], "rewardHint": ["Quest: 20 coins per perfect 10. 60 seconds: +2 per correct, −1 per mistake, 0–100 at the finish. Learning modes give no coins. Leaving early earns no timed coins.", "クエスト：10問連続正解で20コイン。60秒：正解＋2、ミス−1。終了時に0〜100。学習モードと途中終了の時間モードは報酬なし。"], "runReward": ["This run: {n} coins", "今回：{n}コイン"], "timedMistake": ["−1 coin · keep going!", "−1コイン · 続けよう！"], "studyAll": ["Browse all words", "単語一覧"], "lessonDone": ["Lesson complete!", "レッスンクリア！"], "keys": ["Keys", "鍵"], "coins": ["Coins", "コイン"], "wakeFriend": ["Wake a friend · 1 key", "仲間を起こす · 鍵1個"], "foundKey": ["You found a Dream Key!", "夢の鍵を見つけた！"], "useKeyTip": ["Your key is saved. Spend it below to wake a lost friend.", "鍵を保存しました。下のボタンで仲間を起こそう。"], "keysReady": ["Use your saved keys", "持っている鍵を使おう"], "pityStatus": ["Next pull: {chance}% key chance · guaranteed within {n} pulls.", "次の鍵の確率：{chance}% · あと{n}回以内に必ず獲得。"], "totalPulls": ["Total pulls", "合計回数"], "totalPullsHint": ["All required keys are guaranteed by pull 600.", "合計600回以内に必要な鍵がすべてそろいます。"], "totalPullsDone": ["All required keys collected!", "必要な鍵がすべてそろいました！"], "learningNoCoins": ["Practice freely · no coin rewards", "自由に練習 · コイン報酬なし"], "missedWords": ["Missed words", "まちがえた単語"], "reviewMissed": ["Review words", "単語を復習"], "practiceMissed": ["Practice missed words", "まちがえた単語を練習"], "missedIntro": ["Your missed words from past runs, saved on this browser. Revisit any word or practice only this list.", "過去のプレイでまちがえた単語をこのブラウザに保存。好きな単語を復習したり、このリストだけ練習できます。"], "missedEmpty": ["No missed words yet. Words you miss in Quest and 60 seconds will appear here.", "まだありません。クエストや60秒でまちがえた単語がここに表示されます。"], "missedCountNote": ["{n} words to revisit · practice earns no coins", "復習する単語：{n}語 · コイン報酬なし"], "missedOnly": ["Missed words only · no coin rewards", "まちがえた単語だけ · コイン報酬なし"], "practiceRunMissed": ["Practice this run’s missed words", "今回まちがえた単語を練習"], "returnBack": ["Back", "戻る"]};
   const $ = id => document.getElementById(id);
   let direction="jp", mode="endless", score=0, best=0, current=null, locked=false, sound=true;
   let startedAt=0, timerId=null, recent=[], runToken=0, runCoins=0, runSettled=false, paidLevels=0;
@@ -890,6 +899,7 @@ html[lang="id"] .character-drawer summary{font-size:14px}
       return;
     }
     locked=true;
+    if(index!==current.correct)rememberMissed([current.answer.en]);
     currentRunAnswers.push({en:current.answer.en,selected:current.options[index][direction==="jp"?"jp":"en"],correct:index===current.correct});
     const token=runToken;
     const btns=[...$("answers").children];btns.forEach(b=>b.disabled=true);
@@ -961,6 +971,40 @@ html[lang="id"] .character-drawer summary{font-size:14px}
     const savedPractice=JSON.parse(localStorage.getItem("mojimo_jp1_practiced_v1")||"[]");
     if(Array.isArray(savedPractice))practiced=new Set(savedPractice.filter(word=>validWords.has(word)));
   } catch {}
+  let missedWords=new Set();
+  try {const saved=JSON.parse(localStorage.getItem("mojimo_jp1_missed_words_v1")||"[]");if(Array.isArray(saved))missedWords=new Set(saved.filter(id=>validWords.has(id)));}catch{}
+  function rememberMissed(ids){
+    for(const id of ids)if(validWords.has(id))missedWords.add(id);
+    try{localStorage.setItem("mojimo_jp1_missed_words_v1",JSON.stringify([...missedWords]))}catch{}
+    renderMissedHome();
+  }
+  // Import misses still available in the most recent saved run.
+  if(lastRun)rememberMissed(lastRun.answers.filter(a=>!a.correct).map(a=>a.en));
+  let studyMissedOnly=false,studyReturnScreen="home";
+  function renderMissedHome(){
+    $("missedHomeCount").textContent=missedWords.size;
+    $("missedReviewBtn").setAttribute("aria-label",t("missedWords")+" · "+missedWords.size);
+  }
+  function missedWordCard(word){
+    const card=document.createElement("article");card.className="review-word missed";
+    const title=document.createElement("h3");title.lang="ja";title.textContent=word.jp;
+    const reading=document.createElement("p");reading.textContent=word.kana+" · "+romanization[word.en];
+    const meaning=document.createElement("p");meaning.textContent=wordMeaning(word);
+    const button=document.createElement("button");button.className="study-launch";button.textContent=t("studyThis");button.onclick=()=>openStudy(word.en,"missedScreen");
+    card.append(title,reading,meaning,button);return card;
+  }
+  function renderMissedWords(){
+    const list=$("missedWordList");list.replaceChildren();
+    $("practiceAllMissed").disabled=missedWords.size===0;
+    if(!missedWords.size){list.textContent=t("missedEmpty");return;}
+    for(const word of words.filter(w=>missedWords.has(w.en)))list.append(missedWordCard(word));
+  }
+  function openMissedWords(){showLearningScreen("missedScreen");renderMissedWords();}
+  function practiceMissed(ids=[...missedWords],returnScreen="missedScreen"){
+    const wanted=new Set(ids);studyDeck=words.filter(w=>wanted.has(w.en));if(!studyDeck.length)return;
+    activeLesson=null;studyMissedOnly=true;studyReturnScreen=returnScreen;studyIndex=0;studyPhase="lesson";studyMessage="";
+    showLearningScreen("studyScreen");checkStudy();
+  }
   let studyDeck=[],studyIndex=0,studyPhase="lesson",studyChoices=[],studyCorrectIndex=0,studyMessage="";
   function stopSpeech(){
     if("speechSynthesis" in window)window.speechSynthesis.cancel();
@@ -968,7 +1012,7 @@ html[lang="id"] .character-drawer summary{font-size:14px}
   function showLearningScreen(id){
     stopFeedback();stopSpeech();
     clearInterval(timerId);runToken++;
-    for(const screen of ["home","game","gameOver","studyScreen","reviewScreen","surpriseScreen","kanaScreen","lessonsScreen"]){
+    for(const screen of ["home","game","gameOver","studyScreen","reviewScreen","surpriseScreen","kanaScreen","lessonsScreen","missedScreen"]){
       $(screen).classList.toggle("hidden",screen!==id);
     }
   }
@@ -977,6 +1021,8 @@ html[lang="id"] .character-drawer summary{font-size:14px}
     try {localStorage.setItem("mojimo_jp1_last_run",JSON.stringify(lastRun))} catch {}
   }
   function refreshLearningCopy(){
+    renderMissedHome();
+    if(!$("missedScreen").classList.contains("hidden"))renderMissedWords();
     if(!studyDeck)return;
     if(!$("studyScreen").classList.contains("hidden"))renderStudy();
     if(!$("reviewScreen").classList.contains("hidden"))renderReview();
@@ -984,7 +1030,8 @@ html[lang="id"] .character-drawer summary{font-size:14px}
   function studyWord(){
     return studyDeck[studyIndex];
   }
-  function openStudy(wordId){
+  function openStudy(wordId,returnScreen="home"){
+    studyMissedOnly=false;studyReturnScreen=returnScreen;
     activeLesson=null;
     $("studyFilter").value="all";
     $("studyTopic").value="all";
@@ -997,6 +1044,10 @@ html[lang="id"] .character-drawer summary{font-size:14px}
   function renderStudy(){
     const word=studyWord();
     if(!word)return;
+    $("studyTitle").textContent=t(studyMissedOnly?"practiceMissed":"study");
+    $("studyBack").textContent=t(studyReturnScreen==="home"?"back":"returnBack");
+    $("studyProgress").classList.toggle("hidden",studyMissedOnly);
+    $("studyScreen").querySelector(".study-filters").classList.toggle("hidden",studyMissedOnly);
     $("lessonGuide").textContent=lessonGuideText();
     const isQuiz=studyPhase==="quiz";
     $("studyLesson").classList.toggle("hidden",isQuiz);
@@ -1006,7 +1057,7 @@ html[lang="id"] .character-drawer summary{font-size:14px}
     $("studyKana").textContent=word.kana;
     $("studyRomaji").textContent=romanization[word.en];
     $("studyMeaning").textContent=wordMeaning(word);$("studyMeaning").lang="en";
-    $("lessonCoins").textContent=t("learningNoCoins");
+    $("lessonCoins").textContent=t(studyMissedOnly?"missedOnly":"learningNoCoins");
     $("studyProgress").textContent=t("practiced").replace("{n}",practiced.size).replace("{total}",words.length);
     $("studyPosition").textContent=t("studyPosition").replace("{n}",studyIndex+1).replace("{total}",studyDeck.length);
     $("studyFeedback").textContent=studyMessage?t(studyMessage):"";
@@ -1027,8 +1078,9 @@ html[lang="id"] .character-drawer summary{font-size:14px}
     stopSpeech();
     const word=studyWord();
     const group=choiceGroups.find(group=>group.includes(word.en));
-    const related=words.filter(other=>other.en!==word.en && group?.includes(other.en));
-    const alternatives=related.length?related:words.filter(other=>other.en!==word.en && other.level===word.level);
+    const pool=studyMissedOnly&&studyDeck.length>1?studyDeck:words;
+    const related=pool.filter(other=>other.en!==word.en && group?.includes(other.en));
+    const alternatives=related.length?related:studyMissedOnly&&studyDeck.length>1?studyDeck.filter(other=>other.en!==word.en):words.filter(other=>other.en!==word.en && other.level===word.level);
     const other=alternatives[Math.floor(Math.random()*alternatives.length)];
     studyCorrectIndex=Math.random()<.5?0:1;
     studyChoices=studyCorrectIndex===0?[word,other]:[other,word];
@@ -1053,7 +1105,7 @@ html[lang="id"] .character-drawer summary{font-size:14px}
     if(next<0||next>=studyDeck.length)return;
     stopSpeech();stopFeedback();
     studyIndex=next;studyPhase="lesson";studyMessage="";
-    renderStudy();
+    if(studyMissedOnly)checkStudy();else renderStudy();
   }
   function renderReview(){
     const summary=$("runSummary"),list=$("runWords");
@@ -1062,21 +1114,14 @@ html[lang="id"] .character-drawer summary{font-size:14px}
     const reason=t(lastRun.reason==="wrong"?"runWrong":lastRun.reason==="time"?"runTime":"runExit");
     const date=new Date(lastRun.at).toLocaleString(locale==="ja"?"ja-JP":"en-GB",{dateStyle:"medium",timeStyle:"short"});
     summary.textContent=date+" · "+t(lastRun.mode)+" · "+t("score")+" "+lastRun.score+" · "+reason;
-    const missed=lastRun.answers.find(answer=>!answer.correct);
-    if(missed){
-      const word=words.find(word=>word.en===missed.en);
-      const message=document.createElement("p");
-      message.textContent=t("missedWord")+" · "+word.jp+" · "+wordMeaning(word);
-      summary.append(message);
-      const button=document.createElement("button");
-      button.className="study-launch";button.textContent=t("studyThis");
-      button.addEventListener("click",()=>openStudy(word.en));
-      summary.append(button);
+    const missedIds=[...new Set(lastRun.answers.filter(answer=>!answer.correct).map(answer=>answer.en))];
+    if(missedIds.length){
+      const button=document.createElement("button");button.className="study-launch";button.textContent=t("practiceRunMissed");button.onclick=()=>practiceMissed(missedIds,"reviewScreen");summary.append(button);
     }
     if(!lastRun.answers.length){
       const note=document.createElement("p");note.textContent=t("noAnswers");list.append(note);
     }
-    for(const answer of lastRun.answers){
+    for(const answer of [...lastRun.answers].sort((a,b)=>Number(a.correct)-Number(b.correct))){
       const word=words.find(word=>word.en===answer.en);
       const card=document.createElement("article");
       card.className="review-word"+(answer.correct?"":" missed");
@@ -1085,8 +1130,8 @@ html[lang="id"] .character-drawer summary{font-size:14px}
       const reading=document.createElement("p");reading.textContent=word.kana+" · "+romanization[word.en];
       const meaning=document.createElement("p");meaning.textContent=t("meaningLabel")+" · "+wordMeaning(word);
       const chosen=document.createElement("p");chosen.textContent=t("yourAnswer")+" · "+answer.selected;
-      const button=document.createElement("button");button.className="secondary";button.textContent=t("studyThis");
-      button.addEventListener("click",()=>openStudy(word.en));
+      const button=document.createElement("button");button.className=answer.correct?"secondary":"study-launch";button.textContent=t("studyThis");
+      button.addEventListener("click",()=>openStudy(word.en,"reviewScreen"));
       card.append(status,title,reading,meaning,chosen,button);list.append(card);
     }
   }
@@ -1096,8 +1141,13 @@ html[lang="id"] .character-drawer summary{font-size:14px}
   $("studyBtn").addEventListener("click",()=>openStudy());
   $("reviewBtn").addEventListener("click",openReview);
   $("reviewOverBtn").addEventListener("click",openReview);
-  for(const id of ["studyBack","reviewBack"])$(id).addEventListener("click",()=>showLearningScreen("home"));
+  $("studyBack").addEventListener("click",()=>{showLearningScreen(studyReturnScreen);if(studyReturnScreen==="reviewScreen")renderReview();if(studyReturnScreen==="missedScreen")renderMissedWords();});
+  $("reviewBack").addEventListener("click",()=>showLearningScreen("home"));
+  $("missedBack").onclick=()=>showLearningScreen("home");
+  $("missedReviewBtn").onclick=openMissedWords;
+  $("practiceAllMissed").onclick=()=>practiceMissed();
   function filterStudy(){
+    studyMissedOnly=false;
     activeLesson=null;
     stopSpeech();stopFeedback();
     const filter=$("studyFilter").value;
@@ -1227,7 +1277,7 @@ html[lang="id"] .character-drawer summary{font-size:14px}
   function lessonGuideText(){return activeLesson?lessonNotes[activeLesson.topic][localeIndex()]:''}
   function renderLessons(){
     const list=$('lessonList');list.replaceChildren();
-    lessonGroups.forEach((lesson,i)=>{const b=document.createElement('button');b.className='lesson-card';const title=document.createElement('strong');title.textContent=format('lessonPart',{n:i+1,count:lesson.words.length});const sub=document.createElement('span');sub.textContent=t(lesson.topic.startsWith('vocabulary')?['starter','everyday','intermediate','challenge'][Number(lesson.topic.slice(-1))]:lesson.topic);const preview=document.createElement('small');preview.textContent=lesson.words.map(w=>w.jp).join(' · ');b.append(title,sub,preview);b.onclick=()=>{activeLesson=lesson;studyDeck=lesson.words;studyIndex=0;studyPhase='lesson';studyMessage='';$('studyFilter').value='all';$('studyTopic').value='all';showLearningScreen('studyScreen');renderStudy()};list.append(b)});
+    lessonGroups.forEach((lesson,i)=>{const b=document.createElement('button');b.className='lesson-card';const title=document.createElement('strong');title.textContent=format('lessonPart',{n:i+1,count:lesson.words.length});const sub=document.createElement('span');sub.textContent=t(lesson.topic.startsWith('vocabulary')?['starter','everyday','intermediate','challenge'][Number(lesson.topic.slice(-1))]:lesson.topic);const preview=document.createElement('small');preview.textContent=lesson.words.map(w=>w.jp).join(' · ');b.append(title,sub,preview);b.onclick=()=>{studyMissedOnly=false;studyReturnScreen="lessonsScreen";activeLesson=lesson;studyDeck=lesson.words;studyIndex=0;studyPhase='lesson';studyMessage='';$('studyFilter').value='all';$('studyTopic').value='all';showLearningScreen('studyScreen');renderStudy()};list.append(b)});
   }
   $('lessonsBtn').onclick=()=>{showLearningScreen('lessonsScreen');renderLessons()};$('lessonsBack').onclick=()=>showLearningScreen('home');
   function refreshNewScreens(){
